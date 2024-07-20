@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<section class="section gray-bg" id="blog">
+    <div class="container">
+        <div class="row justify-content-center">
+
+            <div class="col-lg-7 text-center">
+                <div class="blog-post-image">
+                    <img src="http://127.0.0.1:5000/static/uploads/{{ post[4] }}" alt="blog-post-image" widht="750" height="500">
+                </div>
+                <div class="section-title">                   
+                    <h2> {{ post[1] }}</h2>
+                    <div class="blog-post-meta">
+                        <span class="meta-date">{{ post[6].strftime("%B %d, %Y") }}</span>
+                        <span class="meta-author">by {{ post[2]|safe }}</span>
+                    </div>
+                    <p> {{ post[3]|safe }} </p>
+                </div>
+            </div>
+        </div>
+   
+    </div>
+        
+
+        </div>
+    </div>
+</section>
+
+{% endblock content %}

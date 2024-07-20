@@ -1,0 +1,234 @@
+{% extends 'adminbase.html' %}
+
+{% block title %}
+Dashboard - NiceAdmin Bootstrap Template
+{% endblock title %}
+
+{% block content %}
+    
+<main id="main" class="main">
+      <section class="section">
+        <div class="row">
+          <div class="col-lg-12">
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages%}
+                {% for category, message in messages %}
+                <div class="alert alert-{{ category }}  bg-{{ category }} text-light border-0 alert-dismissible fade show" role="alert">
+                  {{message}}
+                  <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                {% endfor %}
+                {% endif %}
+              {% endwith %}
+  
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title">All Posts</h5>
+                <a href="{{ url_for('import_csv') }}"><button type="button" class="btn btn-dark" style="float: left;">Import CSV</button></a>
+                <a href="{{ url_for('export_post') }}"><button type="button" class="btn btn-dark" style="float: right;">Export Data</button></a>
+                <br/><br/>
+
+                <!-- Table with stripped rows -->
+                <table class="table datatable">
+                  <thead>
+                    <tr>
+                      <th>Id</th>
+                      <th>Title</th>
+                      <th>Author</th>                     
+                      <th>Image</th>       
+                      <th>Category</th>    
+                      <th>Publish Date</th> 
+                      <th>Action</th>                           
+                    </tr>
+                  </thead>
+                  <tbody>                    
+                    {% for post in posts %}
+                    <tr class="recordrow{{ post['id'] }}">
+                        <td>{{ loop.index }}</td>
+                        <td> {{ post['title'] }}</td> 
+                        <td> {{ post['author'] }}</td>
+                        <td><img src="{{ url_for('static', filename='uploads/' + post['feature_img']) }}" alt="Feature Image" width="100px"></td>     
+                        <td> {{ post['categories'] }}</td>   
+                        <td> {{ post['date_created'] }}</td>                          
+                        <td>
+                          <ul class="list-inline m-0">
+                           
+                            <li class="list-inline-item">
+                                <button class="btn btn-success btn-update btn-sm rounded-0" type="button" data-toggle="tooltip" data-placement="top" title="Edit" data-bs-toggle="modal" data-bs-target="#basicModal" data-id="{{ post['id'] }}"><i class="fa fa-edit"></i></button>
+                            </li>
+                            <li class="list-inline-item">
+                                <button class="btn btn-danger btn-sm rounded-0" type="button" data-toggle="tooltip" data-placement="top" title="Delete" onclick="deletepost(`{{ post['id'] }}`)"><i class="fa fa-trash"></i></button>
+                            </li>
+                        </ul>
+
+                        </td>                       
+                      </tr>                  
+                        
+                    {% endfor %}
+                    
+                  </tbody>
+                </table>
+                <!-- End Table with stripped rows -->
+  
+              </div>
+            </div>
+  
+          </div>
+        </div>
+      </section>
+
+
+      <div class="modal modal-lg fade" id="basicModal" tabindex="-1">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Update Post</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                              <!-- General Form Elements -->
+                              <form action="{{ url_for('update_post') }}" method="post" enctype=multipart/form-data>
+
+                                <div class="row mb-3">
+                                  <label for="inputText" class="col-sm-2 col-form-label">Post Title</label>
+                                  <div class="col-sm-10">
+                                    <input type="text" name ="post_title" id="post_title" value="" class="form-control">
+                                  </div>
+                                </div>   
+                                <div class="row mb-3">
+                                  <label for="inputNumber" class="col-sm-2 col-form-label">Image</label>
+                                  <div class="col-sm-10">
+                                    <input class="form-control" accept="image/*" type="file" name="file" id="fileupload" onchange="loadFile(event)">
+                                    <img src="" id="output" width="100" style="margin-top: 10px;">
+
+
+                                  </div>
+                                </div>
+                
+                                <div class="row mb-3">
+                                  <label class="col-sm-2 col-form-label">Category</label>
+                                  <div class="col-sm-10 category-options">
+                                    
+                                  </div>
+                                </div>
+                                <div class="row mb-3">
+                                  <label for="inputNumber" class="col-sm-2 col-form-label">Author</label>
+                                  <div class="col-sm-10">
+                                    <input type="text" name ="post_author" id="post_author" value="" class="form-control">
+                                  </div>
+                                </div>  
+                               <div class="col-lg-12">
+                                <div class="card">
+                                  <div class="card-body">
+                                    <h5 class="card-title">Description</h5>  
+                                    <!-- TinyMCE Editor -->
+                                    <textarea class="tinymce-editor" name="post_description" id="post_description">
+                                      
+                                    </textarea><!-- End TinyMCE Editor -->
+                      
+                                  </div>
+                                </div>
+              
+                          <div class="row mb-3">                             
+                              <div class="col-sm-10">
+                                <input type="hidden" id="postId" name="postId" value="">
+                                <button type="submit" class="btn btn-primary">Submit</button>
+                              </div>
+                            </div>
+                
+                        </div>
+                      </form><!-- End General Form Elements -->
+            </div>
+     
+          </div>
+        </div>
+      </div><!-- End Basic Modal-->
+          
+  </main><!-- End #main -->
+{% endblock content %}
+
+
+{% block javascript %}
+  <script>
+jQuery(document).ready(function($){
+    $(".btn-update").on("click", function(){
+        var dataId = $(this).data("id");
+        $.ajax({
+                url: '/getblog_post',
+                type: 'POST',
+                data: { id: dataId },
+                success: function(response) {                 
+                  console.log(response)
+                    if (response) {
+                      var category_options=`<select class="form-select" multiple aria-label="multiple select example" name="multiselect">
+                                      <option>Select Categories</option>
+                                      {% for category in categories %}
+                                      <option value="{{ category[0] }}"`;
+                                      var cat=`{{category[0]}}`;
+                                    
+                        if(response.data.categories.indexOf(String(cat)) != -1){
+                          category_options+='selected="selected"';
+                        }                                      
+                                      category_options+=`>{{ category[1] }}</option>
+                                      {% endfor %}                        
+                                    </select>`
+
+                          
+                      $(".category-options").html(category_options);
+                      $("#post_title").val(response.data.title);
+                      $("#post_author").val(response.data.author);
+                      $('img#output').attr('src', `{{ url_for('static', filename='uploads/')}}`+ response.data.feature_img);                   
+                      tinymce.get("post_description").setContent(response.data.content); // 'post_description' as the textarea id
+                      $("#postId").val(response.data.id);
+                    } else {
+                        alert(response.message);
+                    }
+                },
+                error: function(error) {
+                    console.log(error);
+                    // alert('An error occurred while trying to delete the todo.');
+                }
+            });
+    });
+});
+  var loadFile = function(event) {
+    var reader = new FileReader();
+    reader.onload = function(){
+      var output = document.getElementById('output');
+      output.src = reader.result;
+    };
+    reader.readAsDataURL(event.target.files[0]);
+  };
+
+
+  function deletepost(postId) {
+    if (confirm("Are you sure want to delete this post?")) {      
+              $.ajax({
+                url: '/delete_post',
+                type: 'POST',
+                data: { id: postId },
+                success: function(response) {
+                  var recordrow = ".recordrow"+postId
+                  console.log(response.message)
+                    if (response.status =='success') {  
+                        $(recordrow).remove();
+                        setTimeout(function () {                        
+                        // location.reload(true);
+                      }, 500);                     
+                    } else {
+                        alert(response.message);
+                    }
+                },
+                error: function(error) {
+                    console.log(error);
+                    alert('An error occurred while trying to delete the post.');
+                }
+            });
+    }
+    return false;
+
+        }
+
+</script>
+{% endblock javascript %}

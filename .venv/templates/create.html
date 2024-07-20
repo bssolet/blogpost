@@ -1,0 +1,101 @@
+{% extends 'adminbase.html' %}
+
+{% block title %}
+Dashboard - NiceAdmin Bootstrap Template
+{% endblock title %}
+
+{% block content %}
+    
+<main id="main" class="main">
+
+    <section class="section">
+        <div class="row">
+          <div class="col-lg-6">
+  
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title">Add New Post</h5>
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages%}
+                    {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}  bg-{{ category }} text-light border-0 alert-dismissible fade show" role="alert">
+                      {{message}}
+                      <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    {% endfor %}
+                    {% endif %}
+                  {% endwith %}
+  
+                <!-- General Form Elements -->
+                <form action="{{ url_for('add_post') }}" method="post" enctype=multipart/form-data>
+
+                  <div class="row mb-3">
+                    <label for="inputText" class="col-sm-2 col-form-label">Post Title</label>
+                    <div class="col-sm-10">
+                      <input type="text" name ="post_title" class="form-control">
+                    </div>
+                  </div>   
+
+  
+                  <div class="row mb-3">
+                    <label for="inputNumber" class="col-sm-2 col-form-label">Image</label>
+                    <div class="col-sm-10">
+                      <input class="form-control" type="file" name="file" id="formFile">
+                    </div>
+                  </div>
+  
+                  <div class="row mb-3">
+                    <label class="col-sm-2 col-form-label">Category</label>
+                    <div class="col-sm-10">
+                      <select class="form-select" multiple aria-label="multiple select example" name="multiselect">
+                        <option selected>Select Categories</option>
+                        {% for category in categories %}
+                        <option value="{{ category[0] }}">{{ category[1] }}</option>
+                        {% endfor %}                        
+                      </select>
+                    </div>
+                  </div>
+                  <div class="row mb-3">
+                    <label for="inputNumber" class="col-sm-2 col-form-label">Author</label>
+                    <div class="col-sm-10">
+                      <input type="text" name ="post_author" class="form-control">
+                    </div>
+                  </div>  
+              </div>
+            </div>  
+          </div>
+  
+          <div class="col-lg-6">
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title">Description</h5>  
+                <!-- TinyMCE Editor -->
+                <textarea class="tinymce-editor" name="post_description">
+                  <p>Hello World!</p>
+                  <p>This is TinyMCE <strong>full</strong> editor</p>
+                </textarea><!-- End TinyMCE Editor -->
+  
+              </div>
+            </div>
+
+            <div class="row mb-3">
+               
+                <div class="col-sm-10">
+                  <button type="submit" class="btn btn-primary">Submit</button>
+                </div>
+              </div>
+  
+          </div>
+
+           
+
+
+        </form><!-- End General Form Elements -->
+
+        </div>
+      </section>
+
+
+  </main><!-- End #main -->
+
+{% endblock content %}

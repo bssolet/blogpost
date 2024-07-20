@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Register
+{% endblock title %}
+
+{% block content %}
+    
+<div class="container mt-4">
+    <h2>User List</h2>
+	{% if users %}
+    <p>Users Information</p> 
+    <p style="float: right;"><a href="{{ url_for('export_users') }}">Export Users</a></p>
+
+    <table class="table table-hover table-striped table-bordered ">
+           <thead>
+           <th>Id</th> 
+           <th>Name</th> 
+           <th>Email</th> 
+          </thead>
+        
+        <tbody id="results" >
+            {% for user in users %} 
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td>{{ user[1] }}</td>
+                    <td>{{ user[2] }}</td>
+                </tr>          
+            {% endfor %}
+        </tbody>
+    </table>
+        
+    <div id="record_not_found"></h4>
+    {% endif %}
+</div>
+
+{% endblock content %}

@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+
+    <title> {% block title %}        
+    {% endblock title %} - FlaskerAPP</title>
+
+    
+  <!-- Template Main CSS File -->
+  <link href="{{ url_for('static', filename='assets/css/style.css') }}" rel="stylesheet">
+  </head>
+  <body>
+   {% include 'navbar.html' %}
+
+   {% block content %} {% endblock content %}
+
+   
+  
+   
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+    <!--
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js" integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js" integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF" crossorigin="anonymous"></script>
+    -->
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <link rel="stylesheet" href="https://cdn.datatables.net/2.0.8/css/dataTables.dataTables.css" /> 
+    <script src="https://cdn.datatables.net/2.0.8/js/dataTables.js"></script>
+
+    
+
+
+    <script>
+      // Automatically close the alert after 2 seconds
+      setTimeout(function() {
+        var alertDiv = document.getElementById('autoCloseAlert');
+       // alertDiv.classList.remove('show'); // Remove the 'show' class to trigger fade-out
+        
+        // Remove the alert from the DOM after fade-out completes (300ms, adjust as needed)
+        setTimeout(function() {
+          // alertDiv.remove();
+        }, 300);
+      }, 2000);
+    </script>
+
+
+    <script>
+      $(document).ready(function () {
+        $(".search").keyup(function () {
+          var value = $(this).val()
+          if (value == ''){
+            var value=''
+          }
+          
+          $.ajax({
+              url: '/search_results',
+              type: 'POST',        
+              data: { val: value },
+              success: function(data) {
+                console.log(data)
+                $('#results').empty();
+                $("#record_not_found").empty()
+                if (data.length > 0) {
+                    data.forEach(item => {                            
+                        $('#results').append(`<tr><td>${item[0]} </td><td>${item[1]} </td> <td>${item[2]}</td> </tr>`);
+                    });
+                } else {
+                    console.log("NO record found")
+                    $("#record_not_found").html("<p>No record found</p>")
+                }
+              },
+              error: function(error) {
+                  console.log(error);
+                  $("#record_not_found").html("<p>No record found</p>")
+              }
+          })
+          })
+        });
+    </script>
+    
+{% block Javascript %}
+
+{% endblock Javascript %}   
+  </body>
+</html>

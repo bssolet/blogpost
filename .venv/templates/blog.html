@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<section class="section gray-bg" id="blog">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-7 text-center">
+                <div class="section-title">
+                    <h2>Latest News</h2>
+                    <p>I design and develop services for customers of all sizes, specializing in creating stylish, modern websites</p>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+
+            {% for post in blogPosts %}                    
+           
+            <div class="col-lg-4">
+                <div class="blog-grid">
+                    <div class="blog-img">
+                        <div class="date">{{ post['date_created'].strftime("%B %d, %Y") }}</div>
+                        <div class="author">{{ post['author'] }}</div>
+                        <a href="#">
+                            <img src="http://127.0.0.1:5000/static/uploads/{{ post['feature_img'] }} " title="" alt="" width="100%" height="280">
+                        </a>
+                    </div>
+                    <div class="blog-info">
+                        <h5><a href="#"> {{ post['title'] }} </a></h5>
+                        <p>{{ post['content'][:150]|safe  }}</p>
+                        <div class="btn-bar">
+                            <a href="/blog/{{ post['id'] }}" class="px-btn-arrow">
+                                <span>Read More</span>
+                                <i class="arrow"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+
+        </div>
+    </div>
+</section>
+
+{% endblock content %}

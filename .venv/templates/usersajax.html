@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+    
+    {% block content %}
+    <div class="container mt-4">
+        <h1>Data table</h1>   
+        <table id="example" class="table table-striped">
+            <thead>
+                <tr>
+                  <th scope="col">Id</th>
+                  <th scope="col">Name</th>
+                  <th scope="col">Email</th>
+           
+                </tr>
+              </thead>
+              <tbody>
+              </tbody>
+        </table>        
+    </div>
+    {% endblock content %}
+
+
+{% block Javascript %}
+<script>
+$(document).ready( function () {
+  table = $('#example').DataTable( {    
+    processing: true,
+    serverSide: true,
+    pageLength: 10,
+      ajax: {        
+        url: '/get_users',
+        type: 'POST',
+        dataSrc: 'data',
+    },
+      columns: [
+      { data: 'id' },
+      { data: 'name'},
+      { data: 'email'}
+      ],
+    });
+  } );   
+</script>    
+
+{% endblock Javascript %}    
+
