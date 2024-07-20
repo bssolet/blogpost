@@ -1,4 +1,4 @@
-from flask import Flask,render_template,redirect, session, flash, url_for, request,jsonify, send_file, g
+from flask import Flask,render_template,redirect, session, flash, url_for, request,jsonify, send_file
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField
 from wtforms.validators import DataRequired, Email, ValidationError
@@ -10,6 +10,8 @@ import xlsxwriter
 from werkzeug.utils import secure_filename
 import os
 from datetime import datetime
+import requests
+ 
 
 
 
@@ -492,38 +494,58 @@ def export_users():
 
     # return jsonify('exported')  
 
-@app.route('/import_csv')
+@app.route('/import_csv', methods=['POST'])
 def import_csv():
-    file_path = "C:/Users/Admin/Desktop/exportpost.csv"
-    data  = pd.read_csv(file_path)
-    df = pd.DataFrame(data)
-    # Insert DataFrame to Table
-    for row in df.itertuples():
+    if 'file' not in request.files:
+        return jsonify({'error': 'No file provided'}), 400
+
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({'error': 'No file selected'}), 400
+
+    if file and file.filename.endswith('.csv'):
+        file_path = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
+        file.save(file_path)
+
+        data  = pd.read_csv(file_path)
+        df = pd.DataFrame(data)
+        # Insert DataFrame to Table
+        for row in df.itertuples():
+                
+                # Fetch category names based on category IDs
+                category_names = row.categories.split(',')
+                date_created = datetime.strptime(row.date_created, '%d-%m-%Y %H:%M')
+                # Download and save the image
+                image_url = row.feature_img
+                image_name = os.path.basename(image_url)
+                image_path = os.path.join(app.config['UPLOAD_FOLDER'], image_name)
+                response = requests.get(image_url, stream=True)
+                if response.status_code == 200:
+                    with open(image_path, 'wb') as f:
+                        for chunk in response.iter_content(1024):
+                            f.write(chunk)
+                else:
+                    print(f"Error downloading image: {image_url}")
             
-            # Fetch category names based on category IDs
-            category_names = row.categories.split(',')
-            date_created = row.date_created
-            timestamp = datetime.strptime(date_created, '%d-%m-%Y %H:%M').timestamp()      
-            print(timestamp)      
-            
-          
-            category_ids = []
-            for category_name in category_names:
-                category_name = category_name.strip()
+                category_ids = []
+                for category_name in category_names:
+                    category_name = category_name.strip()
+                    cursor = conn.cursor()
+                    query = "SELECT id FROM category WHERE name = %s"
+                    cursor.execute(query, (category_name,))  # Note the comma after category_name
+                    category_id = cursor.fetchone()
+                    if category_id:
+                        category_ids.append(category_id[0])
+                        
+                cat_idx = ', '.join(map(str, category_ids))  # Convert IDs to strings before joining
+                
                 cursor = conn.cursor()
-                query = "SELECT id FROM category WHERE name = %s"
-                cursor.execute(query, (category_name,))  # Note the comma after category_name
-                category_id = cursor.fetchone()
-                if category_id:
-                    category_ids.append(category_id[0])
-                    
-            cat_idx = ', '.join(map(str, category_ids))  # Convert IDs to strings before joining
-            
-            cursor = conn.cursor()
-            cursor.execute("INSERT INTO posts (post_title, post_author, post_description, feature_image, post_categories, created_at) VALUES (%s, %s, %s, %s, %s, %s)",(row.title, row.author, row.content, row.feature_img, cat_idx, timestamp))
-            conn.commit()
+                cursor.execute("INSERT INTO posts (post_title, post_author, post_description, feature_image, post_categories, created_at) VALUES (%s, %s, %s, %s, %s, %s)",(row.title, row.author, row.content, image_name, cat_idx, date_created))
+                conn.commit()
+                
     
-    return jsonify('imported')
+    flash("CSV file has been successfully Imported.", 'success')                
+    return redirect('/view_posts')
 
 
 

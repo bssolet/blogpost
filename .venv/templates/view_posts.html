@@ -25,7 +25,11 @@ Dashboard - NiceAdmin Bootstrap Template
             <div class="card">
               <div class="card-body">
                 <h5 class="card-title">All Posts</h5>
-                <a href="{{ url_for('import_csv') }}"><button type="button" class="btn btn-dark" style="float: left;">Import CSV</button></a>
+                <form action="/import_csv" method="post" enctype="multipart/form-data">
+                  <input type="file" name="file">
+                  <button type="submit">Import CSV</button>
+              </form>
+                
                 <a href="{{ url_for('export_post') }}"><button type="button" class="btn btn-dark" style="float: right;">Export Data</button></a>
                 <br/><br/>
 
